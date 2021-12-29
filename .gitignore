@@ -20,3 +20,6 @@
 ###< phpunit/phpunit ###
 
 /docker/database/datadb
+
+# OS specific files ignore
+.DS_Store
