@@ -8,11 +8,27 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
     ports: 
-      - '5432:5432' # host:container
+      - ${POSTGRES_PUBLIC_PORT}:5432 # host:container
     volumes:
       - initdb:/docker-entrypoint-initdb.d
       - datadb:/var/lib/postgresql/data:rw
+    networks:
+      - back
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: database_admin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_MAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_LISTEN_PORT: 80 
+    ports: 
+      - ${PGADMIN_PUBLIC_PORT}:80 # host:container
+    networks:
+      - back
 
 volumes:
   initdb: 
@@ -27,3 +43,6 @@ volumes:
       type: 'none'
       o: 'bind'
       device: 'docker/database/datadb'
+
+networks: 
+    back:

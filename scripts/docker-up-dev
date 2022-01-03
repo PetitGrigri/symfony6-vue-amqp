@@ -1,0 +1,44 @@
+#!/bin/bash
+
+
+ENVVIRONENT_DEV_FILE=.env.dev.local # The env.dev.local file name. TODO use a fallback (with .env.dev) ? 
+INITIALIZED_FILE="docker/database/datadb/PG_CONTAINER_INITIALIZED" # The location of a file created after the initdb
+MAX_MIGRATION_TRY=100 # The max count of try to migrate the database
+
+# Prevent to execute the script if the file is not available
+if ! test -f "$ENVVIRONENT_DEV_FILE"; then
+    echo "The file : $ENVVIRONENT_DEV_FILE does not exist."
+    exit 100
+fi
+
+# Launch docker-compose with the ENVVIRONENT_DEV_FILE
+docker-compose --env-file $ENVVIRONENT_DEV_FILE up -d
+
+# Get database (PostgreSQL) docker container
+DOCKER_DATABASE_CONTAINER_ID=$(docker container ps -qf name=^database$)
+
+# Init the counter of test
+TRY_COUNTER=0
+
+# Migrate doctrine database when PostgreSQL is ready
+echo "⌛ Please wait : database migration"
+while : ; do 
+    # Get the status of the database with pg_isready (See : https://docs.postgresql.fr/11/app-pg-isready.html)
+    POSTGRES_STATUS=$(docker container exec -ti $(docker container ps -qf name=^database$) pg_isready -q && echo $?)
+
+    # Migrate doctrine when the Postgres is available
+    if test ${POSTGRES_STATUS:=3} -eq 0 && test -f "$INITIALIZED_FILE" ; then
+        bin/console doctrine:migrations:migrate --no-interaction
+        break
+    fi
+
+    # Wait 0.1 second before retry and increment TRY_COUNTER
+    sleep 0.1
+    ((TRY_COUNTER=TRY_COUNTER+1))
+
+    # Stop to try to migrate after MAX_MIGRATION_TRY try
+    if test $TRY_COUNTER -eq $MAX_MIGRATION_TRY; then
+        echo -e "\033[0;31m⚠ Too much try. The migration will not be executed !\033[0m Please try manually"
+        break
+    fi
+done

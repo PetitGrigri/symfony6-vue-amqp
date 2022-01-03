@@ -94,7 +94,9 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "dev-compose-up": "scripts/docker-up-dev",
+        "dev-compose-down": "docker-compose --env-file .env.dev.local down"
     },
     "conflict": {
         "symfony/symfony": "*"
