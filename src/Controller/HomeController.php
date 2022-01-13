@@ -14,6 +14,6 @@ class HomeController extends AbstractController
     {
         // TODO handle content type
 
-        return new JsonResponse(['message' => 'ok']);
+        return new Response('<html><body></body></html>');
     }
 }

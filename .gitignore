@@ -19,7 +19,8 @@
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
-/docker/database/datadb
+/docker/database/data-db
+/docker/pgadmin/data-pgadmin
 
 # OS specific files ignore
 .DS_Store

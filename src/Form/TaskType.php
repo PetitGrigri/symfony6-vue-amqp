@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\Task;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -37,6 +38,7 @@ class TaskType extends AbstractType
     {
         $resolver->setDefaults([
             'csrf_protection' => false,
+            'data_class' => Task::class
         ]);
     }
 }

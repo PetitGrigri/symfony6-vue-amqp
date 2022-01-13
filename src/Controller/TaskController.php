@@ -2,20 +2,29 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\RequestTrait;
+use App\Entity\Task;
 use App\Form\TaskType;
 use App\Exception\FormException;
-use App\Exception\InvalidContentTypeException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Controller\Traits\RequestTrait;
 use Symfony\Component\HttpFoundation\Request;
+use App\Exception\InvalidContentTypeException;
+use App\Service\TaskService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/task', name: "task_")]
 class TaskController extends AbstractController
 {
     use RequestTrait;
+
+    /**
+     * Class constructor.
+     */
+    public function __construct(
+        private TaskService $taskService
+    ){ }
 
     /**
      * Create a new Task
@@ -32,14 +41,13 @@ class TaskController extends AbstractController
     public function addTask(Request $request): Response
     {
         $jsonContent = $this->getJsonContent($request);
+        $task = new Task();
 
-        $form = $this->createForm(TaskType::class, []);
+        $form = $this->createForm(TaskType::class, $task);
         $form->submit($jsonContent);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $form->getData();
-
-            // TODO Create Message to consume
+            $this->taskService->create($task);
 
             return new JsonResponse(status: Response::HTTP_NO_CONTENT);
         }

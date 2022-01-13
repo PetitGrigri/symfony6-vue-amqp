@@ -2,7 +2,7 @@
 
 
 ENVVIRONENT_DEV_FILE=.env.dev.local # The env.dev.local file name. TODO use a fallback (with .env.dev) ? 
-INITIALIZED_FILE="docker/database/datadb/PG_CONTAINER_INITIALIZED" # The location of a file created after the initdb
+INITIALIZED_FILE="docker/database/data-db/PG_CONTAINER_INITIALIZED" # The location of a file created after the initdb
 MAX_MIGRATION_TRY=100 # The max count of try to migrate the database
 
 # Prevent to execute the script if the file is not available
