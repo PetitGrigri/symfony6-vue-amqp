@@ -3,18 +3,13 @@
 namespace App\Service;
 
 use App\Entity\Task;
+use DateTimeImmutable;
 use App\Message\TaskMessage;
 use App\Repository\TaskRepository;
-use DateTime;
-use DateTimeImmutable;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Validator\Constraints\Date;
 
 class TaskService
 {
-    /**
-     * Class constructor.
-     */
     public function __construct(
         private TaskRepository $taskRepository,
         private MessageBusInterface $messageBusInterface,
@@ -28,6 +23,8 @@ class TaskService
 
         // Persist task in the database
         $this->taskRepository->save($task);
+
+        // Create a Task to do
         $this->messageBusInterface->dispatch(
           new TaskMessage($task->getId())
         );

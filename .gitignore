@@ -24,3 +24,4 @@
 
 # OS specific files ignore
 .DS_Store
+.vscode/

@@ -5,9 +5,9 @@ namespace App\MessageHandler;
 use App\Entity\Task;
 use DateTimeImmutable;
 use App\Message\TaskMessage;
+use App\Service\NotifierService;
 use App\Service\TaskService;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
-
 class TaskHandler implements MessageHandlerInterface
 {
     /**
@@ -15,11 +15,11 @@ class TaskHandler implements MessageHandlerInterface
      */
     public function __construct(
         private TaskService $taskService,
+        private NotifierService $nottifierService,
     ) { }
 
     public function __invoke(TaskMessage $taskNotification) 
     {
-
         try {
             $id = $taskNotification->getTaskId();
             $task = $this->taskService->findById($id);
@@ -46,6 +46,8 @@ class TaskHandler implements MessageHandlerInterface
         $task->setStartedAt(new DateTimeImmutable());
         $this->taskService->save($task);
 
+        $this->nottifierService->notifyTaskStarted($task);
+
         sleep($task->getDuration());
     }
     
@@ -59,5 +61,7 @@ class TaskHandler implements MessageHandlerInterface
     {
         $task->setFinishedAt(new DateTimeImmutable());
         $this->taskService->save($task);
+
+        $this->nottifierService->notifyTaskFinished($task);
     }
 }
