@@ -2,12 +2,15 @@
 
 namespace App\MessageHandler;
 
+use Exception;
 use App\Entity\Task;
 use DateTimeImmutable;
 use App\Message\TaskMessage;
-use App\Service\NotifierService;
 use App\Service\TaskService;
+use App\Service\NotifierService;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+
 class TaskHandler implements MessageHandlerInterface
 {
     /**
@@ -23,20 +26,23 @@ class TaskHandler implements MessageHandlerInterface
         try {
             $id = $taskNotification->getTaskId();
             $task = $this->taskService->findById($id);
-
-            //TODO Add try/catch
-            
-            $this->startTask($task);
-            $this->finishTask($task);
-        } catch(\Throwable $e) {
-            dump($e);
+        } catch(Exception $e) {
+            throw new UnrecoverableMessageHandlingException();
         }
+
+
+        // Simulate a long task
+        $this->startTask($task);
+
+
+        $this->finishTask($task);
 
     }
 
     /**
      * Start a task (virtually) 
      * The duration of the task will be used to simulate the duration of a long and difficult Task.
+     * 
      *
      * @param Task $task
      * @return void
@@ -47,6 +53,10 @@ class TaskHandler implements MessageHandlerInterface
         $this->taskService->save($task);
 
         $this->nottifierService->notifyTaskStarted($task);
+
+        if (rand(0, 1) === 1) {
+            throw new Exception(sprintf('Task %s exception', $task->getId()));
+        }
 
         sleep($task->getDuration());
     }
